@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+:root {
+  --char-accent: #f39c12;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Crimson Pro', Georgia, serif;
+  background-color: #0a0a0f;
+  color: #e8e6e3;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111118; }
+::-webkit-scrollbar-thumb { background: var(--char-accent); border-radius: 3px; }
+
+/* Character accent glow utility */
+.accent-glow {
+  box-shadow: 0 0 20px color-mix(in srgb, var(--char-accent) 35%, transparent);
+}
+.accent-border {
+  border-color: var(--char-accent) !important;
+}
+.accent-text {
+  color: var(--char-accent);
+}
+.accent-bg {
+  background-color: var(--char-accent);
+}
+
+/* Typing indicator dots */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-6px); opacity: 1; }
+}
+.dot-1 { animation: bounce-dot 1.2s infinite 0s; }
+.dot-2 { animation: bounce-dot 1.2s infinite 0.2s; }
+.dot-3 { animation: bounce-dot 1.2s infinite 0.4s; }
+
+/* Message slide-in */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.msg-in-right { animation: slide-in-right 0.3s ease forwards; }
+.msg-in-left  { animation: slide-in-left  0.3s ease forwards; }
+
+/* Card hover lift */
+@keyframes float-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-4px); }
+}
