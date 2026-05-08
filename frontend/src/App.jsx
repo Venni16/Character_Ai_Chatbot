@@ -24,7 +24,7 @@ export default function App() {
         setCharacters(data);
         if (data.length > 0) setSelected(data[0]);
       })
-      .catch(() => setError("Could not connect to backend. Make sure the FastAPI server is running on port 8000."));
+      .catch(() => setError("Could not connect to backend. Please ensure the server is running."));
 
     getModels()
       .then((data) => {

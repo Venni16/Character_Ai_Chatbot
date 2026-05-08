@@ -32,6 +32,9 @@ if not api_key:
 
 client = genai.Client(api_key=api_key)
 
+# LM Studio Configuration
+LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234").rstrip("/")
+
 
 # ─── Schemas ────────────────────────────────────────────────────────────────
 
@@ -102,7 +105,7 @@ async def get_models():
     # Try to fetch from LM Studio (Async)
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get("http://127.0.0.1:1234/v1/models", timeout=2.0)
+            response = await client.get(f"{LM_STUDIO_BASE_URL}/v1/models", timeout=2.0)
             if response.status_code == 200:
                 data = response.json()
                 for m in data.get("data", []):
@@ -184,7 +187,7 @@ async def chat(request: ChatRequest):
                 async with httpx.AsyncClient() as http_client:
                     async with http_client.stream(
                         "POST",
-                        "http://127.0.0.1:1234/v1/chat/completions",
+                        f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
                         json={
                             "model": request.model_id,
                             "messages": messages,
@@ -207,11 +210,20 @@ async def chat(request: ChatRequest):
                                     break
                                 try:
                                     chunk_data = json.loads(data_str)
-                                    content = chunk_data["choices"][0]["delta"].get("content", "")
+                                    delta = chunk_data["choices"][0]["delta"]
+                                    
+                                    # Handle both normal content and reasoning content (thinking)
+                                    content = delta.get("content", "")
+                                    reasoning = delta.get("reasoning_content", "")
+                                    
                                     if content:
                                         yield f"data: {json.dumps({'text': content})}\n\n"
-                                except:
+                                    elif reasoning:
+                                        # You can wrap reasoning in tags or just send it
+                                        yield f"data: {json.dumps({'text': reasoning})}\n\n"
+                                except Exception:
                                     continue
+
             except Exception as e:
                 yield f"data: {json.dumps({'error': str(e)})}\n\n"
             yield "data: [DONE]\n\n"
@@ -223,12 +235,14 @@ async def chat(request: ChatRequest):
         try:
             async with httpx.AsyncClient() as http_client:
                 response = await http_client.post(
-                    "http://127.0.0.1:1234/v1/chat/completions",
+                    f"{LM_STUDIO_BASE_URL}/v1/chat/completions",
                     json={"model": request.model_id, "messages": messages, "temperature": 0.7},
                     timeout=60.0
                 )
                 data = response.json()
-                return ChatResponse(reply=data["choices"][0]["message"]["content"], character=request.character)
+                choice = data["choices"][0]["message"]
+                reply = choice.get("content", "") or choice.get("reasoning_content", "")
+                return ChatResponse(reply=reply, character=request.character)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 

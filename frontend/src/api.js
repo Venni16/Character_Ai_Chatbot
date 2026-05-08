@@ -1,13 +1,15 @@
 import axios from "axios";
 
-const api = axios.create({ baseURL: "http://localhost:8000" });
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const api = axios.create({ baseURL: API_URL });
+
 
 export const getCharacters = () => api.get("/characters").then((r) => r.data);
 
 export const getModels = () => api.get("/models").then((r) => r.data);
 
 export const streamChat = async (character, message, history, modelId, provider, onChunk) => {
-  const response = await fetch("http://localhost:8000/chat", {
+  const response = await fetch(`${API_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
